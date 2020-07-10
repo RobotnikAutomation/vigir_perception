@@ -120,8 +120,8 @@ public:
     //mls.setDilationVoxelSize(0.025);
     //mls.setDilationIterations(1);
 
-    mls.setSearchRadius(0.05);
-    mls.setPolynomialOrder(1);
+    mls.setSearchRadius(0.5);
+    mls.setPolynomialOrder(2);
     mls.setComputeNormals(true);
     mls.setInputCloud(pc_voxelized);
 
@@ -183,9 +183,9 @@ public:
     */
 
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> greedy;
-    greedy.setSearchRadius(0.1);
+    greedy.setSearchRadius(0.2);
     greedy.setMu (2.5);
-    greedy.setMaximumNearestNeighbors(50);
+    greedy.setMaximumNearestNeighbors(200);
     greedy.setMinimumAngle(M_PI/18); // 10 degrees
     greedy.setMaximumAngle(2*M_PI/3); // 120 degrees
     greedy.setNormalConsistency(true);

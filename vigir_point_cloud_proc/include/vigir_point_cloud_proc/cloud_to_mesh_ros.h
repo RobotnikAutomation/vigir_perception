@@ -68,7 +68,7 @@ public:
 
     cloud_sub_ = pnh.subscribe("cloud", p_cloud_queue_size_, &CloudToMeshRos::cloudCallback, this);
 
-    cloud_to_mesh_.setVoxelFilterSize(0.025);
+    cloud_to_mesh_.setVoxelFilterSize(0.1);
 
   }
 
