@@ -51,6 +51,8 @@
 
 #include <pcl/io/ply_io.h>
 
+#include <pcl/io/obj_io.h>
+
 namespace vigir_point_cloud_proc
 {
 
@@ -70,14 +72,41 @@ public:
     surface_reconstruction_.reset(new pcl::MarchingCubesRBF<PointTNormal>());
 
     voxel_size_ = 0.05;
+
+    radius_MLS_ = 0.5;
+    polynomial_order_MLS_ = 2;
+    radius_GPT_ = 0.2;
+    maximum_nearest_neighbors_GPT_ = 200;
+
+    mesh_path_ = "";
   }
 
   bool setInput( const boost::shared_ptr<pcl::PointCloud<PointT> > pc_in){
     pc_ = pc_in;
   }
 
-  void setVoxelFilterSize(double size){
+    void setVoxelFilterSize(double size){
     voxel_size_ = size;
+  }
+
+    void setRadiusMLS(double radius){
+    radius_MLS_ = radius;
+  }
+
+    void setPolynomialOrderMLS(int poly){
+    polynomial_order_MLS_ = poly;
+  }
+
+  void setRadiusGPT(double radius){
+    radius_GPT_ = radius;
+  }
+
+  void setMaximumNearestNeighborsGPT(int MNN){
+    maximum_nearest_neighbors_GPT_ = MNN;
+  }
+
+  void setMeshPath(std::string path){
+    mesh_path_ = path;
   }
 
   bool computeMesh()
@@ -120,8 +149,8 @@ public:
     //mls.setDilationVoxelSize(0.025);
     //mls.setDilationIterations(1);
 
-    mls.setSearchRadius(0.5);
-    mls.setPolynomialOrder(2);
+    mls.setSearchRadius(radius_MLS_);
+    mls.setPolynomialOrder(polynomial_order_MLS_);
     mls.setComputeNormals(true);
     mls.setInputCloud(pc_voxelized);
 
@@ -183,7 +212,7 @@ public:
     */
 
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> greedy;
-    greedy.setSearchRadius(0.2);
+    greedy.setSearchRadius(radius_GPT_);
     greedy.setMu (2.5);
     greedy.setMaximumNearestNeighbors(200);
     greedy.setMinimumAngle(M_PI/18); // 10 degrees
@@ -196,6 +225,8 @@ public:
 
     //std::cout << "start reconstruct\n";
     greedy.reconstruct(mesh_);
+
+    pcl::io::saveOBJFile(mesh_path_, mesh_);
 
     double time_greedy = stop_watch_.getTimeSeconds();
     //std::cout << "Greedy finished in " << time_greedy - time_kdtree << " s.\n";
@@ -231,7 +262,12 @@ private:
 
   double voxel_size_;
 
+  double radius_MLS_;
+  int polynomial_order_MLS_;
+  double radius_GPT_;
+  int maximum_nearest_neighbors_GPT_;
 
+  std::string mesh_path_;
 
 };
 

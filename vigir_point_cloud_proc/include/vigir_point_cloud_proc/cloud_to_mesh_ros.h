@@ -60,6 +60,13 @@ public:
     ros::NodeHandle pnh("~");
 
     pnh.param("cloud_sub_queue_size", p_cloud_queue_size_, 1);
+    pnh.param("radius_MLS", radius_MLS_, 0.5);
+    pnh.param("polynomial_order_MLS", polynomial_order_MLS_, 2);
+    pnh.param("voxel_size", voxel_size_, 0.1);
+    pnh.param("radius_GPT", radius_GPT_, 0.2);
+    pnh.param("maximum_nearest_neighbors_GPT", maximum_nearest_neighbors_GPT_, 200);
+
+    pnh.param("mesh_path_out", mesh_path_, std::string(""));
 
     ROS_INFO("CloudToMeshRos using queue size %d", p_cloud_queue_size_);
 
@@ -68,7 +75,14 @@ public:
 
     cloud_sub_ = pnh.subscribe("cloud", p_cloud_queue_size_, &CloudToMeshRos::cloudCallback, this);
 
-    cloud_to_mesh_.setVoxelFilterSize(0.1);
+    cloud_to_mesh_.setVoxelFilterSize(voxel_size_);
+
+    cloud_to_mesh_.setRadiusMLS(radius_MLS_);
+    cloud_to_mesh_.setPolynomialOrderMLS(polynomial_order_MLS_);
+    cloud_to_mesh_.setRadiusGPT(radius_GPT_);
+    cloud_to_mesh_.setMaximumNearestNeighborsGPT(maximum_nearest_neighbors_GPT_);
+
+    cloud_to_mesh_.setMeshPath(mesh_path_);
 
   }
 
@@ -111,6 +125,14 @@ private:
   sensor_msgs::PointCloud2 cloud_self_filtered_out;
 
   int p_cloud_queue_size_;
+
+  double radius_MLS_;
+  int polynomial_order_MLS_;
+  double voxel_size_;
+  double radius_GPT_;
+  int maximum_nearest_neighbors_GPT_;
+
+  std::string mesh_path_;
 
   CloudToMesh<PointT, pcl::PointNormal> cloud_to_mesh_;
 
