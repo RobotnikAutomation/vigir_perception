@@ -77,8 +77,6 @@ public:
     polynomial_order_MLS_ = 2;
     radius_GPT_ = 0.2;
     maximum_nearest_neighbors_GPT_ = 200;
-
-    mesh_path_ = "";
   }
 
   bool setInput( const boost::shared_ptr<pcl::PointCloud<PointT> > pc_in){
@@ -103,10 +101,6 @@ public:
 
   void setMaximumNearestNeighborsGPT(int MNN){
     maximum_nearest_neighbors_GPT_ = MNN;
-  }
-
-  void setMeshPath(std::string path){
-    mesh_path_ = path;
   }
 
   bool computeMesh()
@@ -264,8 +258,6 @@ private:
   int polynomial_order_MLS_;
   double radius_GPT_;
   int maximum_nearest_neighbors_GPT_;
-
-  std::string mesh_path_;
 
 };
 

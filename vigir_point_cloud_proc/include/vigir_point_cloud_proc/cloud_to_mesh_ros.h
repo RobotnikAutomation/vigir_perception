@@ -68,8 +68,6 @@ public:
     pnh.param("radius_GPT", radius_GPT_, 0.2);
     pnh.param("maximum_nearest_neighbors_GPT", maximum_nearest_neighbors_GPT_, 200);
 
-    pnh.param("mesh_path_out", mesh_path_, std::string(""));
-
     ROS_INFO("CloudToMeshRos using queue size %d", p_cloud_queue_size_);
 
     marker_pub_ = pnh.advertise<visualization_msgs::Marker>("mesh_marker", 1, true);
@@ -85,8 +83,6 @@ public:
     cloud_to_mesh_.setPolynomialOrderMLS(polynomial_order_MLS_);
     cloud_to_mesh_.setRadiusGPT(radius_GPT_);
     cloud_to_mesh_.setMaximumNearestNeighborsGPT(maximum_nearest_neighbors_GPT_);
-
-    cloud_to_mesh_.setMeshPath(mesh_path_);
 
   }
 
@@ -147,8 +143,6 @@ private:
   double voxel_size_;
   double radius_GPT_;
   int maximum_nearest_neighbors_GPT_;
-
-  std::string mesh_path_;
 
   CloudToMesh<PointT, pcl::PointNormal> cloud_to_mesh_;
 
