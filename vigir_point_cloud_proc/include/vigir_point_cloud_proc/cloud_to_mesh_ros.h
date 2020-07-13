@@ -43,6 +43,8 @@
 #include <vigir_point_cloud_proc/mesh_conversions.h>
 //#include <vigir_filtered_localized_scan_utils/filtered_localized_scan_converter.h>
 
+#include "map_msgs/SaveMap.h"
+
 namespace vigir_point_cloud_proc
 {
 
@@ -74,6 +76,8 @@ public:
     shape_pub_  = pnh.advertise<shape_msgs::Mesh>("mesh_shape", 1, true);
 
     cloud_sub_ = pnh.subscribe("cloud", p_cloud_queue_size_, &CloudToMeshRos::cloudCallback, this);
+
+    map_server_ = pnh.advertiseService("save_OBJ_map", &CloudToMeshRos::saveOBJMap, this);
 
     cloud_to_mesh_.setVoxelFilterSize(voxel_size_);
 
@@ -114,12 +118,24 @@ public:
     }
   }
 
+  bool saveOBJMap(map_msgs::SaveMap::Request &req,
+                  map_msgs::SaveMap::Response &res)
+  {
+    pcl::PolygonMesh mesh = cloud_to_mesh_.getMesh();
+
+    pcl::io::saveOBJFile(req.filename.data, mesh);
+
+    return true;
+  }
+
 
 private:
 
   ros::Subscriber cloud_sub_;
   ros::Publisher marker_pub_;
   ros::Publisher shape_pub_;
+
+  ros::ServiceServer map_server_;
 
   sensor_msgs::PointCloud2 cloud_out_;
   sensor_msgs::PointCloud2 cloud_self_filtered_out;

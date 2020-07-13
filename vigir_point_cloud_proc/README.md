@@ -5,4 +5,11 @@ This package provides classes and nodes for generating meshes from 3D data (poin
 
 Both nodes publish the mesh as a shape_mgs/Mesh.
 
+The mesh can be saved as an .obj file using the /cloud_to_mesh_node/save_OBJ_map service and adding the path:
+    ```sh
+    rosservice call /cloud_to_mesh_node/save_OBJ_map "filename:
+    data: '/home/myuser/map.obj'"
+    ```
+
+
 See the [launch folder](https://github.com/team-vigir/vigir_perception/tree/master/vigir_point_cloud_proc/launch) for launch file examples.

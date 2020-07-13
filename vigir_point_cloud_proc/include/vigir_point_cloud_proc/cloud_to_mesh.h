@@ -226,8 +226,6 @@ public:
     //std::cout << "start reconstruct\n";
     greedy.reconstruct(mesh_);
 
-    pcl::io::saveOBJFile(mesh_path_, mesh_);
-
     double time_greedy = stop_watch_.getTimeSeconds();
     //std::cout << "Greedy finished in " << time_greedy - time_kdtree << " s.\n";
 
