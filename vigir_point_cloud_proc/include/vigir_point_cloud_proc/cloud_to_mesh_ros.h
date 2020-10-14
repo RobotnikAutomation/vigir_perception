@@ -135,7 +135,7 @@ public:
     int len = GLTFfilename.length();
     
     if(GLTFfilename.substr(len-4,len-1)=="gltf"){
-      OBJfilename = GLTFfilename.substr(0,len-5)+"obj";
+      OBJfilename = GLTFfilename.substr(0,len-4)+"obj";
       pcl::io::saveOBJFile(OBJfilename, mesh);
 
       std::string command_str = "obj2gltf -i "+OBJfilename+" -o "+GLTFfilename;
