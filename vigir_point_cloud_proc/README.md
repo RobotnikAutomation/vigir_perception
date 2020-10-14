@@ -11,5 +11,11 @@ The mesh can be saved as an .obj file using the /cloud_to_mesh_node/save_OBJ_map
     data: '/home/myuser/map.obj'"
     ```
 
+The mesh can be saved as a .gltf file using the /cloud_to_mesh_node/save_GLTF_map service and adding the path:
+    ```sh
+    rosservice call /cloud_to_mesh_node/save_GLTF_map "filename:
+    data: '/home/myuser/map.gltf'"
+    ```
+An .obj file will be saved too.
 
 See the [launch folder](https://github.com/team-vigir/vigir_perception/tree/master/vigir_point_cloud_proc/launch) for launch file examples.
