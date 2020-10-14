@@ -75,7 +75,8 @@ public:
 
     cloud_sub_ = pnh.subscribe("cloud", p_cloud_queue_size_, &CloudToMeshRos::cloudCallback, this);
 
-    map_server_ = pnh.advertiseService("save_OBJ_map", &CloudToMeshRos::saveOBJMap, this);
+    obj_map_server_ = pnh.advertiseService("save_OBJ_map", &CloudToMeshRos::saveOBJMap, this);
+    gltf_map_server_ = pnh.advertiseService("save_GLTF_map", &CloudToMeshRos::saveGLTFMap, this);
 
     cloud_to_mesh_.setVoxelFilterSize(voxel_size_);
 
@@ -124,6 +125,31 @@ public:
     return true;
   }
 
+  bool saveGLTFMap(map_msgs::SaveMap::Request &req,
+                  map_msgs::SaveMap::Response &res)
+  {
+    pcl::PolygonMesh mesh = cloud_to_mesh_.getMesh();
+
+    std::string GLTFfilename = req.filename.data;
+    std::string OBJfilename;
+    int len = GLTFfilename.length();
+    
+    if(GLTFfilename.substr(len-4,len-1)=="gltf"){
+      OBJfilename = GLTFfilename.substr(0,len-5)+"obj";
+      pcl::io::saveOBJFile(OBJfilename, mesh);
+
+      std::string command_str = "obj2gltf -i "+OBJfilename+" -o "+GLTFfilename;
+      ROS_INFO(command_str.c_str());
+
+      system( command_str.c_str() );
+    }
+    else{
+      ROS_WARN("Incompatible file format");
+    }
+
+    return true;
+  }
+
 
 private:
 
@@ -131,7 +157,8 @@ private:
   ros::Publisher marker_pub_;
   ros::Publisher shape_pub_;
 
-  ros::ServiceServer map_server_;
+  ros::ServiceServer obj_map_server_;
+  ros::ServiceServer gltf_map_server_;
 
   sensor_msgs::PointCloud2 cloud_out_;
   sensor_msgs::PointCloud2 cloud_self_filtered_out;
