@@ -102,6 +102,10 @@ public:
   void setMaximumNearestNeighborsGPT(int MNN){
     maximum_nearest_neighbors_GPT_ = MNN;
   }
+    
+  void setAddColorParam(bool add_color){
+    add_color_ = add_color;
+  }
 
   bool computeMesh()
   {
@@ -205,7 +209,7 @@ public:
     poisson.reconstruct(mesh);
     */
 
-    pcl::GreedyProjectionTriangulation<pcl::PointNormal> greedy;
+    pcl::GreedyProjectionTriangulation<PointTNormal> greedy;
     greedy.setSearchRadius(radius_GPT_);
     greedy.setMu (2.5);
     greedy.setMaximumNearestNeighbors(200);
@@ -230,7 +234,7 @@ public:
     //surface_reconstruction_->setInputCloud(point_cloud_normal_voxelized);
 
     //std::cout << "Total Reconstruction finished in " << stop_watch_.getTimeSeconds() << " s.";
-
+    
     return true;
 
     //pcl::io::savePLYFile("/home/kohlbrecher/poly.ply", mesh_);
@@ -246,7 +250,7 @@ private:
   //tf::Transformer tf_transformer_;
   boost::shared_ptr<pcl::PointCloud<PointT> > pc_;
 
-  boost::shared_ptr<pcl::SurfaceReconstruction<pcl::PointNormal> > surface_reconstruction_;
+  boost::shared_ptr<pcl::SurfaceReconstruction<PointTNormal> > surface_reconstruction_;
 
   pcl::PolygonMesh mesh_;
 
@@ -258,6 +262,8 @@ private:
   int polynomial_order_MLS_;
   double radius_GPT_;
   int maximum_nearest_neighbors_GPT_;
+
+  bool add_color_;
 
 };
 

@@ -132,7 +132,7 @@ public:
       if (marker_pub_.getNumSubscribers() > 0){
         visualization_msgs::Marker mesh_marker;
 
-        meshToMarkerMsg(depth_image_to_mesh_.getMesh() ,mesh_marker);
+        meshToMarkerMsg(depth_image_to_mesh_.getMesh() ,mesh_marker, false);
         mesh_marker.header.frame_id = depth_msg->header.frame_id;
         marker_pub_.publish(mesh_marker);
       }

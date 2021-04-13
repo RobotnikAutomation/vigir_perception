@@ -68,6 +68,8 @@ public:
     pnh.param("radius_GPT", radius_GPT_, 0.2);
     pnh.param("maximum_nearest_neighbors_GPT", maximum_nearest_neighbors_GPT_, 200);
 
+    pnh.param("add_color", add_color_, false);
+
     ROS_INFO("CloudToMeshRos using queue size %d", p_cloud_queue_size_);
 
     marker_pub_ = pnh.advertise<visualization_msgs::Marker>("mesh_marker", 1, true);
@@ -85,6 +87,8 @@ public:
     cloud_to_mesh_.setRadiusGPT(radius_GPT_);
     cloud_to_mesh_.setMaximumNearestNeighborsGPT(maximum_nearest_neighbors_GPT_);
 
+    cloud_to_mesh_.setAddColorParam(add_color_);
+
   }
 
   void cloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_in)
@@ -100,7 +104,7 @@ public:
       if (marker_pub_.getNumSubscribers() > 0){
         visualization_msgs::Marker mesh_marker;
 
-        meshToMarkerMsg(cloud_to_mesh_.getMesh() ,mesh_marker);
+        meshToMarkerMsg(cloud_to_mesh_.getMesh() ,mesh_marker, add_color_);
         marker_pub_.publish(mesh_marker);
       }
 
@@ -121,6 +125,7 @@ public:
     pcl::PolygonMesh mesh = cloud_to_mesh_.getMesh();
 
     pcl::io::saveOBJFile(req.filename.data, mesh);
+    pcl::io::savePLYFile(req.filename.data.substr(0, req.filename.data.size()-3)+"ply", mesh);
 
     return true;
   }
@@ -171,7 +176,10 @@ private:
   double radius_GPT_;
   int maximum_nearest_neighbors_GPT_;
 
-  CloudToMesh<PointT, pcl::PointNormal> cloud_to_mesh_;
+  bool add_color_;
+
+  CloudToMesh<PointT, pcl::PointXYZRGBNormal> cloud_to_mesh_;
+  
 
 };
 

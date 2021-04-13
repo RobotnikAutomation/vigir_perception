@@ -35,7 +35,11 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "scan_to_clouds_pub_node");
 
-  vigir_point_cloud_proc::CloudToMeshRos<pcl::PointXYZ> conv;
+  bool add_color = false;
+  ros::param::get("add_color", add_color);
+
+  vigir_point_cloud_proc::CloudToMeshRos<pcl::PointXYZRGB> conv;
+  
 
   ros::spin();
   return 0;

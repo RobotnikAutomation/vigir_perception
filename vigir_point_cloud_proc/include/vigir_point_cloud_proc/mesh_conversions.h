@@ -94,7 +94,72 @@ static bool meshToShapeMsg(const pcl::PolygonMesh& in, shape_msgs::Mesh& mesh)
   return true;
 }
 
-static bool meshToMarkerMsg(const pcl::PolygonMesh& in, visualization_msgs::Marker& marker)
+static bool meshToShapeMsg(const pcl::PolygonMesh& in, shape_msgs::Mesh& mesh, std::vector<std_msgs::ColorRGBA> &rgba)
+{
+  pcl_msgs::PolygonMesh pcl_msg_mesh;
+
+  pcl_conversions::fromPCL(in, pcl_msg_mesh);
+
+  sensor_msgs::PointCloud2Modifier pcd_modifier(pcl_msg_mesh.cloud);
+
+  size_t size = pcd_modifier.size();
+
+  mesh.vertices.resize(size);
+  
+  //rgba.resize(size);
+
+  std::cout << "polys: " << pcl_msg_mesh.polygons.size() << " vertices: " << pcd_modifier.size() << "\n";
+
+  sensor_msgs::PointCloud2ConstIterator<float> pt_iter(pcl_msg_mesh.cloud, "x");
+
+  for(size_t i = 0; i < size ; i++, ++pt_iter){
+    mesh.vertices[i].x = pt_iter[0];
+    mesh.vertices[i].y = pt_iter[1];
+    mesh.vertices[i].z = pt_iter[2];
+  }
+  
+  sensor_msgs::PointCloud2ConstIterator<float> pt_rgb(pcl_msg_mesh.cloud, "rgb");
+
+  std_msgs::ColorRGBA color;
+  for(size_t i = 0; i < size ; i++, ++pt_rgb){
+    int rgb_i = *reinterpret_cast<int*>(const_cast<float*>(&(pt_rgb[0])));
+    color.r = 0xFF -((rgb_i & 0x00ff0000) >> 16);
+    color.g = 0xFF -((rgb_i & 0x0000ff00) >> 8);
+    color.b = 0xFF -(rgb_i & 0x000000ff);
+    color.a = 0xFF;
+    rgba.push_back(color);
+  }
+
+  //ROS_INFO("Found %ld polygons", triangles.size());
+
+  std::cout << "Updated vertices" << "\n";
+
+  //BOOST_FOREACH(const Vertices polygon, triangles)
+
+  mesh.triangles.resize(in.polygons.size());
+
+  for (size_t i = 0; i < in.polygons.size(); ++i)
+  {
+    if(in.polygons[i].vertices.size() < 3)
+    {
+      ROS_WARN("Not enough points in polygon. Ignoring it.");
+      continue;
+    }
+
+    //shape_msgs::MeshTriangle triangle = shape_msgs::MeshTriangle();
+    //boost::array<uint32_t, 3> xyz = {{in.polygons[i].vertices[0], in.polygons[i].vertices[1], in.polygons[i].vertices[2]}};
+    //triangle.vertex_indices = xyz;
+
+    //mesh.triangles.push_back(shape_msgs::MeshTriangle());
+    //mesh.triangles[i].vertex_indices.resize(3);
+
+    for (int j = 0; j < 3; ++j)
+      mesh.triangles[i].vertex_indices[j] = in.polygons[i].vertices[j];
+  }
+  return true;
+}
+
+static bool meshToMarkerMsg(const pcl::PolygonMesh& in, visualization_msgs::Marker& marker, bool add_color)
 {
   marker.type = visualization_msgs::Marker::TRIANGLE_LIST;
   marker.header.frame_id = in.cloud.header.frame_id;
@@ -110,11 +175,20 @@ static bool meshToMarkerMsg(const pcl::PolygonMesh& in, visualization_msgs::Mark
 
   shape_msgs::Mesh shape_msg_mesh;
 
-  meshToShapeMsg(in, shape_msg_mesh);
+  std::vector<std_msgs::ColorRGBA> rgba;
+
+  if(add_color)
+    meshToShapeMsg(in, shape_msg_mesh, rgba);
+  else
+    meshToShapeMsg(in, shape_msg_mesh);
+  
 
   size_t size_triangles = shape_msg_mesh.triangles.size();
 
   marker.points.resize(size_triangles*3);
+  
+  if(add_color)
+    marker.colors.resize(size_triangles*3);
 
   std::cout << "polys: " << size_triangles << " vertices: " << shape_msg_mesh.vertices.size() << "\n";
 
@@ -131,6 +205,11 @@ static bool meshToMarkerMsg(const pcl::PolygonMesh& in, visualization_msgs::Mark
     marker.points[i]   = shape_msg_mesh.vertices[shape_msg_mesh.triangles[tri_index].vertex_indices[0]];
     marker.points[i+1] = shape_msg_mesh.vertices[shape_msg_mesh.triangles[tri_index].vertex_indices[1]];
     marker.points[i+2] = shape_msg_mesh.vertices[shape_msg_mesh.triangles[tri_index].vertex_indices[2]];
+    if(add_color){
+      marker.colors[i] = rgba[shape_msg_mesh.triangles[tri_index].vertex_indices[0]];
+      marker.colors[i+1] = rgba[shape_msg_mesh.triangles[tri_index].vertex_indices[1]];
+      marker.colors[i+2] = rgba[shape_msg_mesh.triangles[tri_index].vertex_indices[2]];
+    }
     i = i + 3;
 
   }
